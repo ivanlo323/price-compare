@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>產品價格比較工具</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+        .note { color: red; font-weight: bold; }
+        button { padding: 10px 20px; cursor: pointer; margin: 10px; }
+        input[type="text"] { padding: 5px; width: 300px; }
+        .sites-container { display: flex; flex-wrap: wrap; justify-content: center; margin: 20px 0; }
+        .site-item { width: 200px; margin: 10px; text-align: center; }
+        .site-button { 
+            width: 100%; height: 120px; border: 2px solid #ccc; border-radius: 10px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            cursor: pointer; background-color: #f9f9f9; 
+        }
+        .site-button img { max-width: 150px; max-height: 80px; }
+        .site-button p { margin: 5px 0; }
+        .site-checkbox { margin-top: 5px; }
+        .site-button:hover { border-color: #4CAF50; background-color: #e0f7e0; }
+    </style>
+    <script>
+        const sites = [
+            { 
+                id: 'hktvmall', 
+                name: 'HKTVmall', 
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/4/41/HKTVmall_logo.png', 
+                home: 'https://www.hktvmall.com/hktv/zh/', 
+                search: 'https://www.hktvmall.com/hktv/zh/search_a?keyword=' 
+            },
+            { 
+                id: 'taobao', 
+                name: '淘寶', 
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/d/dc/Taobao_Logo.svg', 
+                home: 'https://www.taobao.com/', 
+                search: 'https://s.taobao.com/search?q=' 
+            },
+            { 
+                id: 'pinduoduo', 
+                name: '拼多多', 
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Pinduoduologo.png', 
+                home: 'https://www.pinduoduo.com/', 
+                search: 'https://yangkeduo.com/search_result.html?search_key=' 
+            },
+            { 
+                id: 'iherb', 
+                name: 'iHerb', 
+                logo: 'https://1000logos.net/wp-content/uploads/2020/02/iHerb-Logo.png', 
+                home: 'https://hk.iherb.com/', 
+                search: 'https://hk.iherb.com/search?kw=' 
+            }
+        ];
+
+        function getProduct() {
+            return encodeURIComponent(document.getElementById('product').value.trim());
+        }
+
+        function openSite(siteId) {
+            const site = sites.find(s => s.id === siteId);
+            const product = getProduct();
+            const url = product ? site.search + product : site.home;
+            window.open(url, '_blank');
+        }
+
+        function openSelected() {
+            const product = getProduct();
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][name="website"]:checked');
+            if (checkboxes.length === 0) {
+                alert("請至少選擇一個平台！");
+                return;
+            }
+            checkboxes.forEach(cb => {
+                const site = sites.find(s => s.id === cb.id);
+                const url = product ? site.search + product : site.home;
+                window.open(url, '_blank');
+            });
+        }
+
+        function openAll() {
+            const product = getProduct();
+            sites.forEach(site => {
+                const url = product ? site.search + product : site.home;
+                window.open(url, '_blank');
+            });
+        }
+
+        // 動態生成平台框和checkbox
+        window.onload = function() {
+            const container = document.querySelector('.sites-container');
+            sites.forEach(site => {
+                const div = document.createElement('div');
+                div.className = 'site-item';
+                div.innerHTML = `
+                    <div class="site-button" data-site-id="${site.id}">
+                        <img src="${site.logo}" alt="${site.name} Logo" onerror="this.src='https://via.placeholder.com/150x80?text=${site.name}';">
+                        <p>${site.name}</p>
+                    </div>
+                    <div class="site-checkbox">
+                        <input type="checkbox" id="${site.id}" name="website">
+                        <label for="${site.id}">選擇</label>
+                    </div>
+                `;
+                container.appendChild(div);
+                // 綁定點擊事件到按鈕
+                div.querySelector('.site-button').addEventListener('click', () => openSite(site.id));
+            });
+        };
+    </script>
+</head>
+<body>
+    <h1>產品價格比較工具</h1>
+    <label for="product">輸入產品名稱（可選）：</label>
+    <input type="text" id="product" name="product">
+    <br><br>
+
+    <div class="sites-container"></div>
+
+    <button onclick="openSelected()">開啟選中的平台</button>
+    <button onclick="openAll()">開啟全部平台</button>
+
+    <p class="note">注意：淘寶同拼多多需要手動登入帳戶先可以用搜尋結果。請喺新分頁完成登入。</p>
+    <p>若瀏覽器阻擋彈出視窗，請喺瀏覽器設定允許彈出，或手動複製搜尋連結。</p>
+</body>
+</html>
